@@ -32,6 +32,7 @@ Returns graph for type \emph{"all"} and \emph{"cont"} or (list with) graph and t
 This graphical function enables to visualise cluster profiles (mean representatives of each cluster). Available are three types of plots: non-parametric (LOESS method for small/medium or GAM method for complex data of large size. Both methods are applied from ggplot2 representatives (mean within-cluster trajectories) with/without all individual (original) trajectories, and nonparametric mean trajectories with error bars.
 }
 \examples{
+set.seed(123)
 dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
 dataMale$Gender <- "M"
 dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)

@@ -38,6 +38,7 @@
 #' @importFrom stats rpois
 #' @export
 #' @examples
+#' set.seed(123)
 #' #Simple Linear model where each individual has 10 observations.
 #' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
 #'
@@ -57,7 +58,7 @@
 #'
 #' #Generate panel data with linear trend with 75% objects in first cluster and 25% in the second.
 #' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10, ClusterProb = c(0.75, 0.25))
-#' PanelPlot(data, color = "Cluster")
+#' PanelPlot(data, colour = "Cluster")
 
 GeneratePanel <- function(n, Param, NbVisit, VisitFreq = NULL, TimeVar = NULL, RegModel = NULL, ClusterProb = NULL, Rho = NULL, units = NULL) {
 
@@ -67,6 +68,8 @@ GeneratePanel <- function(n, Param, NbVisit, VisitFreq = NULL, TimeVar = NULL, R
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
     slope_first_last = timepoint = value = . = NULL
+  
+  #library(MASS)
 
   k = nrow(Param) #defines the number of clusters
 

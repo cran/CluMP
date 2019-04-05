@@ -14,12 +14,8 @@
 #' @export
 #' @import dplyr ggplot2
 #' @examples
-#' dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
-#' dataMale$Gender <- "M"
-#' dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
-#' dataFemale$ID <- dataFemale$ID + 50
-#' dataFemale$Gender <- "F"
-#' data <- rbind(dataMale, dataFemale)
+#' set.seed(123)
+#' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
 #'
 #' CluMPoutput <- CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3)
 #' title <- "Plotting clusters' representatives with error bars"
@@ -29,14 +25,14 @@
 #'
 CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_table = FALSE,
                        title = NULL, x_title = NULL, y_title = NULL, plot_NA = FALSE) {
-
+  
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
     slope_first_last = timepoint = value = . = NULL
-
+  
   if(!(type %in% c("all", "cont", "breaks"))) {
     stop('Type should be one of "all", "cont" or "breaks"')
   }
@@ -46,12 +42,15 @@ CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_ta
   }
 
 
+  #library(dplyr)
+  #library(ggplot2)
+
   PlotData <- CluMPoutput$data %>%
-    dplyr::select(CluMPoutput$variables, CluMPoutput$group, "cluster") %>%
-    mutate(cluster = as.factor(cluster))
+    dplyr::select(CluMPoutput$variables, CluMPoutput$group, "memb_CluMP") %>%
+    mutate(memb_CluMP = as.factor(memb_CluMP))
   if (!plot_NA) {
     PlotData <- PlotData %>%
-      filter(!is.na(cluster))
+      filter(!is.na(memb_CluMP))
   }
 
   colnames(PlotData)[which(colnames(PlotData) %in% CluMPoutput$variables)] <- c("Y", "X1")
@@ -60,47 +59,47 @@ CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_ta
 
   if (type == "all") {
 
-    graf <- ggplot(data = PlotData, aes(x = X1, y = Y, group = ID, color = cluster)) +
+    graf <- ggplot(data = PlotData, aes(x = X1, y = Y, group = ID, colour = memb_CluMP)) +
       geom_line(size = .8, alpha = .5) +
-      geom_smooth(aes(x = X1, y = Y, group = cluster, color = cluster), size = 2, method = "auto") +
-      scale_color_discrete(name = "cluster") +
+      geom_smooth(aes(x = X1, y = Y, group = memb_CluMP, colour = memb_CluMP), size = 2, method = "auto") +
+      scale_colour_discrete(name = "cluster") +
       theme_bw() +
       labs(y = "mean, CI", x = CluMPoutput$variables[2])
 
   }else if (type == "cont") {
 
-    graf <- ggplot(data = PlotData, aes(x = X1, y = Y, group = cluster, color = cluster)) +
+    graf <- ggplot(data = PlotData, aes(x = X1, y = Y, group = memb_CluMP, colour = memb_CluMP)) +
       geom_smooth(method = "auto") +
-      scale_color_discrete(name = "cluster") +
+      scale_colour_discrete(name = "cluster") +
       theme_bw() +
       labs(y = "mean, CI", x = CluMPoutput$variables[2])
 
   }else if (type == "breaks") {
 
     if (is.null(nb_intervals)) {
-      stop("numb of intervals")
+      stop("number of intervals should be specified")
     }else if (!is.numeric(nb_intervals) | nb_intervals <= 0) {
-      stop("numb of intervals should be a positive number")
+      stop("number of intervals should be a positive number")
     }
 
     time_point_intervals <- seq(min(PlotData$X1), max(PlotData$X1) - max(PlotData$X1)/100, length.out = nb_intervals)
     # create data frame
     PlotData <- PlotData %>%
       mutate(timepoint = findInterval(X1, time_point_intervals)) %>%
-      group_by(cluster, timepoint) %>%
-      summarise(mean_Y = mean(Y),
-                sd_Y = stats:: sd(Y),
+      group_by(memb_CluMP, timepoint) %>%
+      summarise(mean_Y = mean(Y, na.rm = TRUE),
+                sd_Y = stats:: sd(Y, na.rm = TRUE),
                 n = n(),
-                mean_Time = mean(X1))%>%
+                mean_Time = mean(X1, na.rm = TRUE))%>%
       mutate(Y_ci = 1.96*sd_Y/sqrt(n))
 
     # create graph
     # * na.rm = T -- suppress warnings
-    graf <- ggplot(data = PlotData, aes(x = mean_Time, y = mean_Y, group = cluster, color = cluster)) +
+    graf <- ggplot(data = PlotData, aes(x = mean_Time, y = mean_Y, group = memb_CluMP, colour = memb_CluMP)) +
       geom_errorbar(aes(ymin = mean_Y - Y_ci, ymax = mean_Y + Y_ci), width=.1, size = .9, alpha = 0.5, na.rm = TRUE) +
       geom_line(size = .9) +
       geom_point(size = 3, shape = 21, fill = "white") +
-      scale_color_discrete(name = "cluster") +
+      scale_colour_discrete(name = "cluster") +
       theme_bw() +
       scale_x_continuous(name = CluMPoutput$variables[2]) +
       labs(y = "mean, CI", x = CluMPoutput$variables[2])

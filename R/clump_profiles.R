@@ -12,6 +12,7 @@
 #' @import dplyr
 #' @importFrom stats median sd
 #' @examples
+#' set.seed(123)
 #' dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
 #' dataMale$Gender <- "M"
 #' dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
@@ -30,9 +31,9 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
     slope_first_last = timepoint = value = . = NULL
-
+  
   nb <- CluMPoutput$CluMP %>%
-    group_by(cluster) %>%
+    group_by(memb_CluMP) %>%
     summarise(n = n())
 
   data <- CluMPoutput$data
@@ -41,7 +42,7 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
 
   if (!show_NA) {
     data <- data %>%
-      filter(!is.na(cluster))
+      filter(!is.na(memb_CluMP))
   }
 
   #Y - baseline, change
@@ -52,55 +53,55 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
     mutate(Visit = row_number()) %>%
     filter(Visit == 1) %>%
     ungroup() %>%
-    mutate(cluster = as.factor(as.character(cluster))) %>%
-    group_by(cluster) %>%
+    mutate(memb_CluMP = as.factor(as.character(memb_CluMP))) %>%
+    group_by(memb_CluMP) %>%
     summarise(n = n_distinct(ID), meanY = mean(Y, na.rm = TRUE), sdY = stats:: sd(Y, na.rm = TRUE),
-              medianY = median(Y), Q25Y = stats:: quantile(Y,0.25), Q75Y = stats:: quantile(Y,0.75),
-              minY = min(Y), maxY = max(Y))
+              medianY = median(Y, na.rm = TRUE), Q25Y = stats:: quantile(Y,0.25, na.rm = TRUE), Q75Y = stats:: quantile(Y,0.75, na.rm = TRUE),
+              minY = min(Y, na.rm = TRUE), maxY = max(Y, na.rm = TRUE))
   #change
   change_data <- data %>%
     group_by(ID) %>%
     arrange(X1) %>%
     mutate(Visit = row_number()) %>%
     slice(c(1,n())) %>%
-    dplyr::select(ID, Visit, X1, Y, cluster) %>%
+    dplyr::select(ID, Visit, X1, Y, memb_CluMP) %>%
     mutate(Visit = row_number()) %>%
     ungroup()
-  visit_f <- change_data %>% filter(Visit == 1) %>% dplyr::select(-c(Visit, X1, cluster))
+  visit_f <- change_data %>% filter(Visit == 1) %>% dplyr::select(-c(Visit, X1, memb_CluMP))
   visit_l <- change_data %>% filter(Visit == 2) %>% dplyr::select(-Visit)
   change_data <- left_join(visit_f, visit_l, by = "ID")
   change_data <- change_data %>%
     mutate(abs_change = Y.y - Y.x, abs_change_ann = (Y.y - Y.x)/X1) %>%
-    group_by(cluster) %>%
+    group_by(memb_CluMP) %>%
     summarise(n = n_distinct(ID),
               mean_abs_change = mean(abs_change, na.rm = TRUE),
               sd_abs_change = stats:: sd(abs_change, na.rm = TRUE),
-              q25_abs_change = stats:: quantile(abs_change, 0.25),
-              q50_abs_change = stats:: quantile(abs_change, 0.5),
-              q75_abs_change = stats:: quantile(abs_change, 0.75),
+              q25_abs_change = stats:: quantile(abs_change, 0.25, na.rm = TRUE),
+              q50_abs_change = stats:: quantile(abs_change, 0.5, na.rm = TRUE),
+              q75_abs_change = stats:: quantile(abs_change, 0.75, na.rm = TRUE),
               mean_abs_change_ann = mean(abs_change_ann, na.rm = TRUE),
               sd_abs_change_ann = stats:: sd(abs_change_ann, na.rm = TRUE),
-              q25_abs_change_ann = stats:: quantile(abs_change_ann, 0.25),
-              q50_abs_change_ann = stats:: quantile(abs_change_ann, 0.5),
-              q75_abs_change_ann = stats:: quantile(abs_change_ann, 0.75))
+              q25_abs_change_ann = stats:: quantile(abs_change_ann, 0.25, na.rm = TRUE),
+              q50_abs_change_ann = stats:: quantile(abs_change_ann, 0.5, na.rm = TRUE),
+              q75_abs_change_ann = stats:: quantile(abs_change_ann, 0.75, na.rm = TRUE))
   Y <- list("baseline" = as.data.frame(Bl_data), "change" = as.data.frame(change_data))
 
   #Time
   f_up_data <- data %>%
     group_by(ID) %>%
     arrange(X1) %>%
-    summarise(nVisit = n(), f_up = last(X1), cluster = first(cluster)) %>%
+    summarise(nVisit = n(), f_up = last(X1), memb_CluMP = first(memb_CluMP)) %>%
     ungroup() %>%
-    group_by(cluster) %>%
+    group_by(memb_CluMP) %>%
     summarise(n = n_distinct(ID),
-              q25_visit = stats:: quantile(nVisit, 0.25),
-              q50_visit = stats:: quantile(nVisit, 0.5),
-              q75_visit = stats:: quantile(nVisit, 0.75),
+              q25_visit = stats:: quantile(nVisit, 0.25, na.rm = TRUE),
+              q50_visit = stats:: quantile(nVisit, 0.5, na.rm = TRUE),
+              q75_visit = stats:: quantile(nVisit, 0.75, na.rm = TRUE),
               mean_fup = mean(f_up, na.rm = TRUE),
               sd_fup = stats:: sd(f_up, na.rm = TRUE),
-              q25_fup = stats:: quantile(f_up, 0.25),
-              q50_fup = stats:: quantile(f_up, 0.5),
-              q75_fup = stats:: quantile(f_up, 0.75)) # min max
+              q25_fup = stats:: quantile(f_up, 0.25, na.rm = TRUE),
+              q50_fup = stats:: quantile(f_up, 0.5, na.rm = TRUE),
+              q75_fup = stats:: quantile(f_up, 0.75, na.rm = TRUE)) # min max
   time <- as.data.frame(f_up_data)
 
   if(!is.null(cont_vars)) {
@@ -111,10 +112,10 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
       mutate(Visit = row_number()) %>%
       slice(1) %>%
       ungroup() %>%
-      dplyr::select(cont_vars, cluster) %>%
-      group_by(cluster) %>%
-      summarise_all(funs(mean(., na.rm = TRUE),stats:: sd(., na.rm = TRUE)))
-    cont_bl <- left_join(nb, cont_bl, by = "cluster")
+      dplyr::select(cont_vars, memb_CluMP) %>%
+      group_by(memb_CluMP) %>%
+      summarise_all(list(~mean(., na.rm = TRUE),~stats:: sd(., na.rm = TRUE)))
+    cont_bl <- left_join(nb, cont_bl, by = "memb_CluMP")
 
     cont_change <- data %>%
       group_by(ID) %>%
@@ -123,16 +124,16 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
       slice(c(1,n())) %>%
       mutate(Visit = row_number()) %>%
       ungroup() %>%
-      dplyr::select(cont_vars, Visit, ID, X1, cluster)
-    visit_f <- cont_change %>% filter(Visit == 1) %>% dplyr::select(cluster, cont_vars)
+      dplyr::select(cont_vars, Visit, ID, X1, memb_CluMP)
+    visit_f <- cont_change %>% filter(Visit == 1) %>% dplyr::select(memb_CluMP, cont_vars)
     visit_l <- cont_change %>% filter(Visit == 2) %>% dplyr::select(X1, cont_vars)
     cont_change <- cbind(visit_l[,-1] - visit_f[,-1], visit_f[,1], visit_l[,1])
     cont_change <- cont_change %>%
-      group_by(cluster) %>%
-      mutate_all((funs(ann = ./X1))) %>%
+      group_by(memb_CluMP) %>%
+      mutate_all((list(ann = ./X1))) %>%
       dplyr::select(-c(X1, X1_ann)) %>%
-      summarise_all(funs(mean(., na.rm = TRUE),stats:: sd(., na.rm = TRUE)))
-    cont_change <- left_join(nb, cont_change, by = "cluster")
+      summarise_all(list(~mean(., na.rm = TRUE),~stats:: sd(., na.rm = TRUE)))
+    cont_change <- left_join(nb, cont_change, by = "memb_CluMP")
     cont <- list(baseline = as.data.frame(cont_bl), change = as.data.frame(cont_change))
   } else if (is.null(cont_vars)) {
     cont <- NULL
@@ -141,10 +142,10 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
   if(!is.null(cat_vars)) {
     # #baseline
     data_bl <- data %>% group_by(ID) %>% arrange(X1) %>% slice(1)
-    cat_bl <- tableone:: CreateCatTable(data = data_bl, strata = "cluster", vars = cat_vars)
+    cat_bl <- tableone:: CreateCatTable(data = data_bl, strata = "memb_CluMP", vars = cat_vars)
     # #end
     data_end <- data %>% group_by(ID) %>% arrange(X1) %>% slice(n())
-    cat_end <- tableone:: CreateCatTable(data = data_end, strata = "cluster", vars = cat_vars)
+    cat_end <- tableone:: CreateCatTable(data = data_end, strata = "memb_CluMP", vars = cat_vars)
     categ <- list(baseline = as.data.frame(print(cat_bl, exact = "ascites", quote = F)),
                   end = as.data.frame(print(cat_end, exact = "ascites", quote = F)))
   } else if (is.null(cat_vars)) {
@@ -153,9 +154,9 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
 
   #CluMP_params
   param_table <- CluMPoutput$CluMP[,-1] %>%
-    group_by(cluster) %>%
-    summarise_all(funs(mean, sd))
-  param_table <- left_join(nb, param_table, by = "cluster")
+    group_by(memb_CluMP) %>%
+    summarise_all(list(~mean, ~sd))
+  param_table <- left_join(nb, param_table, by = "memb_CluMP")
   param_table <- as.data.frame(param_table)
 
   if(is.null(cont) & is.null(categ)) {

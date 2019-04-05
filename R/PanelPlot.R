@@ -4,7 +4,7 @@
 #' @param data A data frame containing the variables named in \code{formula} and \code{group} arguments.
 #' @param formula A two-sided \code{\link[stats]{formula}} object, with a numeric, clustering variable (Y) on the left of a ~ separator and the time (numeric) variable on the right. Time is measured from the start of the follow-up period (baseline).
 #' @param group A grouping factor variable (vector), i.e. single identifier for each (trajectory).
-#' @param color Character, which is a variable's name in data. The trajectories are distinguished by colour according to this variable.
+#' @param colour Character, which is a variable's name in data. The trajectories are distinguished by colour according to this variable.
 #' @param show_legend Logical scalar. It indicates whether to show cluster legend. Default is \emph{TRUE}.
 #' @param title String. Is an optional title for a plot. Otherwise no title will used.
 #' @param x_title String. Is an optional title for x axis. Otherwise variable name after ~ in \code{formula} will used.
@@ -14,6 +14,7 @@
 #' @export
 #' @import dplyr ggplot2
 #' @examples
+#' set.seed(123)
 #' dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
 #' dataMale$Gender <- "M"
 #' dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
@@ -21,13 +22,15 @@
 #' dataFemale$Gender <- "F"
 #' data <- rbind(dataMale, dataFemale)
 #'
-#' PanelPlot(data = data, formula = Y ~ Time, group = "ID", color = "Gender")
+#' PanelPlot(data = data, formula = Y ~ Time, group = "ID", colour = "Gender")
 #'
 
-PanelPlot <- function(data, formula = Y ~ Time, group = "ID", color = NA,
+PanelPlot <- function(data, formula = Y ~ Time, group = "ID", colour = NA,
                       show_legend = TRUE,
                       title = NULL, x_title = NULL, y_title = NULL){
 
+  # library(dplyr)
+  # library(ggplot2)
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
@@ -51,37 +54,37 @@ PanelPlot <- function(data, formula = Y ~ Time, group = "ID", color = NA,
   # if(nrow(mf_non_complete) > 1) {
   #   warning('Some of objects contains NA values.', call. = FALSE)
   # }
-  if(!is.na(color) & !(color %in% colnames(data))){
-    warning(paste0('Trere is no color variable in the data set named ', color, '. Color by ID variable.'), call. = FALSE)
-    color <- NA
+  if(!is.na(colour) & !(colour %in% colnames(data))){
+    warning(paste0('Trere is no colour variable in the data set named ', colour, '. colour by ID variable.'), call. = FALSE)
+    colour <- NA
 
   }
-  if(!is.na(color)){
-    if(length(unique(data[,color])) > length(unique(data[,group]))) {
-    warning(paste0('You ae going to assign color by column ', color, '. This column has more unique objects than number of observations. Color by ID variable.'), call. = FALSE)
-    color <- "ID"
+  if(!is.na(colour)){
+    if(length(unique(data[,colour])) > length(unique(data[,group]))) {
+    warning(paste0('You are going to assign colour by column ', colour, '. This column has more unique objects than number of observations. colour by ID variable.'), call. = FALSE)
+    colour <- "ID"
     }
   }
 
 
-  if (!is.na(color)) {
-    Cluster = data %>% dplyr::filter((!!as.name(group)) %in% unique(mf$ID)) %>% dplyr::select(color)
-    mf <- cbind(mf, Cluster = Cluster[, color])
+  if (!is.na(colour)) {
+    Cluster = data %>% dplyr::filter((!!as.name(group)) %in% unique(mf$ID)) %>% dplyr::select(colour)
+    mf <- cbind(mf, Cluster = Cluster[, colour])
     plotMP <- ggplot(data = mf, aes(x = X1, y = Y, group = ID)) +
       geom_line(aes(colour = factor(Cluster))) +
       labs(x = variables[2], y = variables[1]) +
-      scale_colour_discrete(name = color, labels = unique(mf$Cluster)) +
+      scale_colour_discrete(name = colour, labels = unique(mf$Cluster)) +
       theme(legend.position = "right") +
       theme_classic()
     plotMP <- plotMP +
-      if(!show_legend) {guides(color=FALSE)}
+      if(!show_legend) {guides(colour=FALSE)}
   }else {
     plotMP <- ggplot(data = mf, aes(x = X1, y = Y, group = ID)) +
       geom_line(aes(colour = factor(ID))) +
       labs(x = variables[2], y = variables[1]) +
       scale_colour_discrete(labels = unique(mf$ID)) +
       theme_classic() +
-      guides(color=FALSE)
+      guides(colour=FALSE)
   }
 
 
@@ -100,4 +103,3 @@ PanelPlot <- function(data, formula = Y ~ Time, group = "ID", color = NA,
 
 }
 
-# !!! ADD plot/do not plot short obs. Here plot

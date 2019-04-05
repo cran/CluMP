@@ -30,6 +30,7 @@ Determine the optimal number of clusters, returns graphical output (red dot in p
 This function finds optimal number of clusters based on evaluation criteria (indices) available from the NbClust package.
 }
 \examples{
+set.seed(123)
 data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
 OptiNum(data = data, formula = Y ~ Time, group = "ID")
 

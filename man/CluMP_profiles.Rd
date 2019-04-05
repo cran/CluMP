@@ -23,6 +23,7 @@ Returns a \code{\link[base]{list}} with cluster variable (Y) summary, both basel
 The function CluMP_profiles provides a description (profile) for each cluster. The description is in the form of a summary list containing descriptive statistics of a cluster variable, time variable, cluster parameters and other variables (covariates), both continuous and categorical.
 }
 \examples{
+set.seed(123)
 dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
 dataMale$Gender <- "M"
 dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)

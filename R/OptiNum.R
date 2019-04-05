@@ -13,12 +13,16 @@
 #' @export
 #' @import dplyr ggplot2 NbClust
 #' @examples
+#' set.seed(123)
 #' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
 #' OptiNum(data = data, formula = Y ~ Time, group = "ID")
 #'
 
 OptiNum <- function(formula, group, data, index = c("silhouette", "ch", "db"), max_clust = 10, base_val = FALSE) {
 
+  # library(dplyr)
+  # library(ggplot2)
+  # library(NbClust)
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
@@ -82,7 +86,7 @@ OptiNum <- function(formula, group, data, index = c("silhouette", "ch", "db"), m
                                     no   = ifelse(test = max(angle_radian, na.rm = T) == max(abs(angle_radian), na.rm = T),
                                                   yes  = max(abs(angle_radian), na.rm = T),
                                                   no   = -max(abs(angle_radian), na.rm = T))))
-  if (base_val == F) cluster_tmp <- select(cluster_tmp, -base_val)
+  if (base_val == F) cluster_tmp <- dplyr::select(cluster_tmp, -base_val)
   # Scaling values for clustering
   cluster_norm_tmp <- cbind.data.frame("CluMP_ID" = cluster_tmp$CluMP_ID,
                                        scale(cluster_tmp[, -1], center = TRUE, scale = TRUE))

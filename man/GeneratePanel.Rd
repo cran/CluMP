@@ -55,6 +55,7 @@ generating process with a certain function (linear, quadratic, cubic, exponencia
 (fixed and random (intercept, slope) effects of time).
 }
 \examples{
+set.seed(123)
 #Simple Linear model where each individual has 10 observations.
 data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
 
@@ -74,6 +75,6 @@ PanelPlot(data)
 
 #Generate panel data with linear trend with 75\% objects in first cluster and 25\% in the second.
 data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10, ClusterProb = c(0.75, 0.25))
-PanelPlot(data, color = "Cluster")
+PanelPlot(data, colour = "Cluster")
 }
 \keyword{CluMP}

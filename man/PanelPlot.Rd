@@ -4,7 +4,7 @@
 \alias{PanelPlot}
 \title{Plot Micro-Panel (longitudinal) Data}
 \usage{
-PanelPlot(data, formula = Y ~ Time, group = "ID", color = NA,
+PanelPlot(data, formula = Y ~ Time, group = "ID", colour = NA,
   show_legend = TRUE, title = NULL, x_title = NULL, y_title = NULL)
 }
 \arguments{
@@ -14,7 +14,7 @@ PanelPlot(data, formula = Y ~ Time, group = "ID", color = NA,
 
 \item{group}{A grouping factor variable (vector), i.e. single identifier for each (trajectory).}
 
-\item{color}{Character, which is a variable's name in data. The trajectories are distinguished by colour according to this variable.}
+\item{colour}{Character, which is a variable's name in data. The trajectories are distinguished by colour according to this variable.}
 
 \item{show_legend}{Logical scalar. It indicates whether to show cluster legend. Default is \emph{TRUE}.}
 
@@ -31,6 +31,7 @@ Returns plot using package ggplot2.
 This function plots micro-panel (longitudinal) data from stored \code{\link[base]{data.frame}} or randomly generated panel data from \code{\link{GeneratePanel}} function.
 }
 \examples{
+set.seed(123)
 dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
 dataMale$Gender <- "M"
 dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
@@ -38,7 +39,7 @@ dataFemale$ID <- dataFemale$ID + 50
 dataFemale$Gender <- "F"
 data <- rbind(dataMale, dataFemale)
 
-PanelPlot(data = data, formula = Y ~ Time, group = "ID", color = "Gender")
+PanelPlot(data = data, formula = Y ~ Time, group = "ID", colour = "Gender")
 
 }
 \keyword{CLUMP}

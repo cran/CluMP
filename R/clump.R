@@ -21,6 +21,8 @@
 CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
 
 
+  #library(dplyr)
+  #library(amap)
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
   abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
@@ -68,7 +70,7 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
     stop('Time variable should be numeric')
   }
   if (is.na(cl_numb)) {
-    warning('Number of clusters defined as 3. If you want differnet number of clusters define parameter ClNumb', call. = FALSE)
+    warning('Number of clusters defined as 3. If you want different number of clusters define parameter ClNumb', call. = FALSE)
     cl_numb <- 3
   }
   if (!is.numeric(cl_numb) || cl_numb <= 1 || (cl_numb %% 1) != 0){
@@ -107,7 +109,7 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
                                     no   = ifelse(test = max(angle_radian, na.rm = T) == max(abs(angle_radian), na.rm = T),
                                                   yes  = max(abs(angle_radian), na.rm = T),
                                                   no   = -max(abs(angle_radian), na.rm = T))))
-  if (base_val == F) cluster_tmp <- select(cluster_tmp, -base_val)
+  if (base_val == F) cluster_tmp <- dplyr::select(cluster_tmp, -base_val)
   # Scaling values for clustering
   cluster_norm_tmp <- cbind.data.frame("CluMP_ID" = cluster_tmp$CluMP_ID,
                                        scale(cluster_tmp[, -1], center = TRUE, scale = TRUE))
@@ -119,12 +121,11 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
 
   cluster_tmp <- dplyr::left_join(cluster_tmp, cluster_norm_tmp[, c("CluMP_ID", "memb_CluMP")], by = "CluMP_ID")
   cluster_tmp <- cluster_tmp %>%
-    dplyr::select(CluMP_ID, everything()) %>%
-    dplyr::rename(cluster = memb_CluMP)
+    dplyr::select(CluMP_ID, everything())
 
   names(cluster_tmp)[1] <- group # put back old names
 
-  data <- left_join(data, cluster_tmp[, c(group, "cluster")], by = group)
+  data <- left_join(data, cluster_tmp[, c(group, "memb_CluMP")], by = group)
 
   return(list("CluMP" = cluster_tmp, "data" = data, "formula" = formula, "variables" = variables, "group" = group))
 }
