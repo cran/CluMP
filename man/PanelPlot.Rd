@@ -5,7 +5,8 @@
 \title{Plot Micro-Panel (longitudinal) Data}
 \usage{
 PanelPlot(data, formula = Y ~ Time, group = "ID", colour = NA,
-  show_legend = TRUE, title = NULL, x_title = NULL, y_title = NULL)
+  mean_traj_all = FALSE, mean_traj_group = FALSE, show_legend = TRUE,
+  title = NULL, x_title = NULL, y_title = NULL)
 }
 \arguments{
 \item{data}{A data frame containing the variables named in \code{formula} and \code{group} arguments.}
@@ -15,6 +16,10 @@ PanelPlot(data, formula = Y ~ Time, group = "ID", colour = NA,
 \item{group}{A grouping factor variable (vector), i.e. single identifier for each (trajectory).}
 
 \item{colour}{Character, which is a variable's name in data. The trajectories are distinguished by colour according to this variable.}
+
+\item{mean_traj_all}{Logical scalar. It indicates whether to show mean overall trajectory. Default is \emph{FALSE}.}
+
+\item{mean_traj_group}{Logical scalar. It indicates whether to show mean trajectory by group. Default is \emph{FALSE}.}
 
 \item{show_legend}{Logical scalar. It indicates whether to show cluster legend. Default is \emph{TRUE}.}
 
@@ -40,6 +45,7 @@ dataFemale$Gender <- "F"
 data <- rbind(dataMale, dataFemale)
 
 PanelPlot(data = data, formula = Y ~ Time, group = "ID", colour = "Gender")
-
+PanelPlot(data = data, formula = Y ~ Time, group = "ID", colour = "Gender", mean_traj_all = TRUE)
+PanelPlot(data = data, formula = Y ~ Time, group = "ID", colour = "Gender", mean_traj_group = TRUE)
 }
 \keyword{CLUMP}

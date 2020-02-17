@@ -1,3 +1,9 @@
+## version 0.8.0
+
+---
+
+- More methods for hierarhical clustering are added
+
 ## version 0.7.1
 
 ---

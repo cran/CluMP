@@ -12,16 +12,22 @@
 #' @keywords CluMP
 #' @return Returns graph for type \emph{"all"} and \emph{"cont"} or (list with) graph and table of mean trajectories (if specified) for type = \emph{"breaks"}.
 #' @export
-#' @import dplyr ggplot2
+#' @import ggplot2 data.table
+#' @rawNamespace import(dplyr, except = c(last, first, between))
 #' @examples
 #' set.seed(123)
-#' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
+#' dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
+#' dataMale$Gender <- "M"
+#' dataFemale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
+#' dataFemale$ID <- dataFemale$ID + 50
+#' dataFemale$Gender <- "F"
+#' data <- rbind(dataMale, dataFemale)
 #'
 #' CluMPoutput <- CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3)
 #' title <- "Plotting clusters' representatives with error bars"
-#' CluMP_view(CluMPoutput, type = "all" , return_table = TRUE, title = title)
+#' CluMP_view(CluMPoutput, type = "all" , return_table = TRUE)
 #' CluMP_view(CluMPoutput, type = "cont")
-#' CluMP_view(CluMPoutput, type = "breaks", nb_intervals = 5, return_table=TRUE)
+#' CluMP_view(CluMPoutput, type = "breaks", nb_intervals = 5, return_table=TRUE, title = title)
 #'
 CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_table = FALSE,
                        title = NULL, x_title = NULL, y_title = NULL, plot_NA = FALSE) {
@@ -31,26 +37,24 @@ CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_ta
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = NULL
+    slope_first_last = timepoint = value = . = .. = ..colour = 
+    ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
+  
   
   if(!(type %in% c("all", "cont", "breaks"))) {
-    stop('Type should be one of "all", "cont" or "breaks"')
+    stop('Type should be one of "all", "cont" or "breaks".')
   }
 
   if(type != "breaks" & !is.null(nb_intervals)) {
     warning('Argument nb_intervals is not possible to combine with types "all" and "cont". nb_intervals ignored.')
   }
 
-
-  #library(dplyr)
-  #library(ggplot2)
-
-  PlotData <- CluMPoutput$data %>%
-    dplyr::select(CluMPoutput$variables, CluMPoutput$group, "memb_CluMP") %>%
-    mutate(memb_CluMP = as.factor(memb_CluMP))
+  cols <- c(CluMPoutput$variables, CluMPoutput$group, "memb_CluMP")
+  PlotData <- setDT(CluMPoutput$data)[, ..cols]
+  PlotData$memb_CluMP <- as.factor(PlotData$memb_CluMP)
+  
   if (!plot_NA) {
-    PlotData <- PlotData %>%
-      filter(!is.na(memb_CluMP))
+    PlotData <- setDT(PlotData)[!is.na(memb_CluMP),]
   }
 
   colnames(PlotData)[which(colnames(PlotData) %in% CluMPoutput$variables)] <- c("Y", "X1")
@@ -77,21 +81,23 @@ CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_ta
   }else if (type == "breaks") {
 
     if (is.null(nb_intervals)) {
-      stop("number of intervals should be specified")
+      stop("numb of intervals should be defined.")
     }else if (!is.numeric(nb_intervals) | nb_intervals <= 0) {
-      stop("number of intervals should be a positive number")
+      stop("numb of intervals should be a positive number.")
     }
 
-    time_point_intervals <- seq(min(PlotData$X1), max(PlotData$X1) - max(PlotData$X1)/100, length.out = nb_intervals)
+    time_point_intervals <- seq(min(PlotData$X1), max(PlotData$X1), length.out = nb_intervals)
     # create data frame
-    PlotData <- PlotData %>%
-      mutate(timepoint = findInterval(X1, time_point_intervals)) %>%
-      group_by(memb_CluMP, timepoint) %>%
-      summarise(mean_Y = mean(Y, na.rm = TRUE),
-                sd_Y = stats:: sd(Y, na.rm = TRUE),
-                n = n(),
-                mean_Time = mean(X1, na.rm = TRUE))%>%
-      mutate(Y_ci = 1.96*sd_Y/sqrt(n))
+    PlotData <- setDT(PlotData)[, timepoint := findInterval(X1, time_point_intervals),]
+    PlotData <- setDT(PlotData)[, ':='(
+      mean_Y = mean(Y, na.rm = TRUE),
+      sd_Y = stats::sd(Y, na.rm = TRUE),
+      n = .N,
+      mean_Time = mean(X1, na.rm = TRUE)
+    ), by = .(memb_CluMP, timepoint)]
+    PlotData <- setDT(PlotData)[, .(memb_CluMP, timepoint, mean_Y, sd_Y, n, mean_Time)]
+    PlotData <- setDT(PlotData)[!duplicated(setDT(PlotData))]
+    PlotData <- setDT(PlotData)[, Y_ci := 1.96*sd_Y/sqrt(n), ]
 
     # create graph
     # * na.rm = T -- suppress warnings
@@ -119,7 +125,7 @@ CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_ta
 
 
   if (type == "breaks" & return_table == TRUE) {
-    output <- list(graph = graf, table = PlotData)
+    output <- list(graph = graf, table = as.data.frame(PlotData))
   }else if (type == "cont" | type == "all" | (type == "breaks" & return_table == FALSE)) {
     output <- graf
   }

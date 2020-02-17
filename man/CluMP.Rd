@@ -7,7 +7,8 @@
 Sobisek, L., Stachova, M., Fojtik, J. (2018) Novel Feature-Based Clustering of Micro-Panel Data (CluMP). Working paper version online: www.arxiv.org
 }
 \usage{
-CluMP(formula, group, data, cl_numb = NA, base_val = FALSE)
+CluMP(formula, group, data, cl_numb = NA, base_val = FALSE,
+  method = "ward.D")
 }
 \arguments{
 \item{formula}{A two-sided \code{\link[stats]{formula}} object with a numeric clustering variable (Y) on the left of a ~ separator and the time (numeric) variable on the right. Time is measured from the start of the follow-up period (baseline). Any time units are possible.}
@@ -19,6 +20,8 @@ CluMP(formula, group, data, cl_numb = NA, base_val = FALSE)
 \item{cl_numb}{An integer, positive number (scalar) specifying the number of clusters. The \code{\link{OptiNum}} function can be used to determine the optimal number of clusters according to common evaluation criteria (indices).}
 
 \item{base_val}{Indicates whether include a value at zero time point as an additional clustering variable. Default is \emph{FALSE} and the standard number (7) of clustering parameters is used.}
+
+\item{method}{A method which use in hierarhical clustering, same as in \code{\link[stats]{hclust}} function, namely "ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid". Default is "ward.D".}
 }
 \value{
 Cluster Micro-Panel data. The output is the \code{\link[base]{list}} of 5 components which contain results from clustering.
@@ -28,9 +31,11 @@ This function clusters Micro-Panel (longitudinal) Data (or trajectories) to a pr
 }
 \examples{
 data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
-CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, base_val = FALSE)
+CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, 
+base_val = FALSE, method = "ward.D")
 
-CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, base_val = TRUE)
+CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3,
+base_val = TRUE, method = "ward.D")
 
 
 }

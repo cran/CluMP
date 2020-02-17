@@ -6,29 +6,31 @@
 #' @param data A data frame containing the variables named in the \code{formula} and \code{group} arguments.
 #' @param cl_numb An integer, positive number (scalar) specifying the number of clusters. The \code{\link{OptiNum}} function can be used to determine the optimal number of clusters according to common evaluation criteria (indices).
 #' @param base_val Indicates whether include a value at zero time point as an additional clustering variable. Default is \emph{FALSE} and the standard number (7) of clustering parameters is used.
+#' @param method A method which use in hierarhical clustering, same as in \code{\link[stats]{hclust}} function, namely "ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid". Default is "ward.D".
 #' @keywords CluMP
 #' @return Cluster Micro-Panel data. The output is the \code{\link[base]{list}} of 5 components which contain results from clustering.
 #' @source Sobisek, L., Stachova, M., Fojtik, J. (2018) Novel Feature-Based Clustering of Micro-Panel Data (CluMP). Working paper version online: www.arxiv.org
 #' @export
-#' @import dplyr rlang
+#' @import data.table
 #' @examples
 #' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
-#' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, base_val = FALSE)
+#' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, 
+#' base_val = FALSE, method = "ward.D")
 #'
-#' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, base_val = TRUE)
+#' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3,
+#' base_val = TRUE, method = "ward.D")
 #'
 #'
-CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
-
-
-  #library(dplyr)
-  #library(amap)
+CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE, method = "ward.D"){
+  
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
-  abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
-  cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
-  memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-  slope_first_last = timepoint = value = . = NULL
+    abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
+    cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
+    memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
+    slope_first_last = timepoint = value = . = .. = ..colour = 
+    ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
+
 
   if(!any(all.vars(formula) %in% names(data))) {
     varErr <- all.vars(formula)[!(all.vars(formula) %in% names(data))]
@@ -40,7 +42,7 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
   }
 
   # Modelframe from formula
-  mf <- stats:: model.frame(formula = formula, data = data, na.action = NULL)
+  mf <- stats::model.frame(formula = formula, data = data, na.action = NULL)
   variables <- names(mf)
   if(length(variables) > 2) {
     stop('It is not possible to cluster multiple variables. Consider using one of them.')
@@ -50,10 +52,14 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
     stop(paste0('Variable "', varErr, '" does not present in the data.'))
   }
   names(mf) <- c("CluMP_Y", "CluMP_X1")
-  mf <- cbind(mf, "CluMP_ID" = data[, group])
-  mf_complete <- mf[stats:: complete.cases(mf),]
-  mf_complete <- mf_complete %>% group_by(CluMP_ID) %>% mutate(count = n()) %>% filter(count > 2)
-  mf_non_complete <- mf %>% filter(!(CluMP_ID %in% mf_complete$CluMP_ID))
+  mf <- cbind(mf, setDT(data)[, ..group])
+  names(mf)[3] <- "CluMP_ID"
+  mf_complete <- mf[stats::complete.cases(mf),]
+  
+  # save mf_complete as data table. In order to speed up computations
+  mf_complete <- as.data.table(mf_complete)
+  mf_complete <- setDT(mf_complete)[, if (.N > 2) .SD, by = CluMP_ID]
+  mf_non_complete <- setDT(mf)[, if (.N <= 2) .SD, by = CluMP_ID]
   mf <- mf_complete
 
 
@@ -83,49 +89,62 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE){
 
 
   # CluMP prepare
-  cluster_tmp = mf %>%
-    dplyr::group_by(CluMP_ID) %>%
-    dplyr::arrange(CluMP_X1) %>%
-    dplyr::mutate(Visit = row_number()) %>%
-    dplyr::filter(max(Visit) >= 2) %>%
-    dplyr::mutate(base_val = first(CluMP_Y),
-           obsah_trojuh = c(NA, diff(CluMP_Y)/diff(CluMP_X1)/2),
-           slope = (CluMP_Y - first(CluMP_Y))/(CluMP_X1 - first(CluMP_X1)),
-           slope_first_last = (last(CluMP_Y) - first(CluMP_Y))/(last(CluMP_X1) - first(CluMP_X1)),
-           cos_nom = (last(CluMP_X1) - first(CluMP_X1))*(CluMP_X1 - first(CluMP_X1)) + (last(CluMP_Y) - first(CluMP_Y))*(CluMP_Y - first(CluMP_Y)),
-           cos_denom = sqrt((last(CluMP_X1) - first(CluMP_X1))^2 + (last(CluMP_Y) - first(CluMP_Y))^2)*sqrt((CluMP_X1 - first(CluMP_X1))^2 + (CluMP_Y - first(CluMP_Y))^2),
-           cosinus = ifelse(cos_nom/cos_denom > 1, 1, cos_nom/cos_denom),
-           abs_angle_radian = acos(cosinus),
-           angle_radian = ifelse(slope_first_last < slope, 1, -1)*abs_angle_radian) %>%
-    summarise(base_val = first(base_val),
-              mean_triangle = mean(obsah_trojuh, na.rm = T),
-              sd_triangle = stats::sd(obsah_trojuh, na.rm = T),
-              mean_abs_triangle = mean(abs(obsah_trojuh), na.rm = T),
-              sd_abs_triangle = stats::sd(abs(obsah_trojuh), na.rm = T),
-              k = stats::cov(CluMP_Y, CluMP_X1)/stats::var(CluMP_X1),
-              rel_pos = sum(diff(CluMP_Y) > 0, na.rm = T)/max(sum(diff(CluMP_Y) < 0, na.rm = T), 0.1),
-              angle_radian = ifelse(test = all(is.na(angle_radian)),
-                                    yes  = NA,
-                                    no   = ifelse(test = max(angle_radian, na.rm = T) == max(abs(angle_radian), na.rm = T),
-                                                  yes  = max(abs(angle_radian), na.rm = T),
-                                                  no   = -max(abs(angle_radian), na.rm = T))))
-  if (base_val == F) cluster_tmp <- dplyr::select(cluster_tmp, -base_val)
-  # Scaling values for clustering
-  cluster_norm_tmp <- cbind.data.frame("CluMP_ID" = cluster_tmp$CluMP_ID,
-                                       scale(cluster_tmp[, -1], center = TRUE, scale = TRUE))
+  cluster_tmp <- setDT(mf)[, Visit := 1:.N, by = CluMP_ID
+                           ][order(CluMP_X1)
+                             ][max(Visit) >2]
+  cluster_tmp <- setDT(cluster_tmp)[, ':='(
+    base_val = data.table::first(CluMP_Y),
+    obsah_trojuh = c(NA, diff(CluMP_Y)/diff(CluMP_X1)/2),
+    slope = (CluMP_Y - data.table::first(CluMP_Y))/(CluMP_X1 - data.table::first(CluMP_X1)),
+    slope_first_last = (data.table::last(CluMP_Y) - data.table::first(CluMP_Y))/(last(CluMP_X1) - data.table::first(CluMP_X1)),
+    cos_nom = (data.table::last(CluMP_X1) - data.table::first(CluMP_X1))*(CluMP_X1 - data.table::first(CluMP_X1)) + (data.table::last(CluMP_Y) - data.table::first(CluMP_Y))*(CluMP_Y - data.table::first(CluMP_Y)),
+    cos_denom = sqrt((data.table::last(CluMP_X1) - data.table::first(CluMP_X1))^2 + (data.table::last(CluMP_Y) - data.table::first(CluMP_Y))^2)*sqrt((CluMP_X1 - data.table::first(CluMP_X1))^2 + (CluMP_Y - data.table::first(CluMP_Y))^2)
+    ), by = CluMP_ID]
+  cluster_tmp <- setDT(cluster_tmp)[, cosinus := ifelse(cos_nom/cos_denom > 1, 1, cos_nom/cos_denom), ]
+  cluster_tmp <- setDT(cluster_tmp)[, abs_angle_radian := acos(cosinus), ]
+  cluster_tmp <- setDT(cluster_tmp)[, angle_radian := ifelse(slope_first_last < slope, 1, -1)*abs_angle_radian, ]
 
-  # Clustering
-  tmp_comb <- amap:: Dist(cluster_norm_tmp[, -1], method = "euclid")
-  tmp_comb <- stats:: hclust(tmp_comb, method = "ward.D")
-  cluster_norm_tmp$memb_CluMP <- stats:: cutree(tmp_comb, k = cl_numb)
-
-  cluster_tmp <- dplyr::left_join(cluster_tmp, cluster_norm_tmp[, c("CluMP_ID", "memb_CluMP")], by = "CluMP_ID")
+  cluster_tmp <- setDT(cluster_tmp)[, ':='(
+    base_val = first(base_val),
+    mean_triangle = mean(obsah_trojuh, na.rm = T),
+    sd_triangle = stats::sd(obsah_trojuh, na.rm = T),
+    mean_abs_triangle = mean(abs(obsah_trojuh), na.rm = T),
+    sd_abs_triangle = stats::sd(abs(obsah_trojuh), na.rm = T),
+    k = stats::cov(CluMP_Y, CluMP_X1)/stats::var(CluMP_X1),
+    rel_pos = sum(diff(CluMP_Y) > 0, na.rm = T)/max(sum(diff(CluMP_Y) < 0, na.rm = T), 0.1)
+  ), by = CluMP_ID]
   cluster_tmp <- cluster_tmp %>%
-    dplyr::select(CluMP_ID, everything())
+    group_by(CluMP_ID) %>%
+    mutate(angle_radian = ifelse(test = all(is.na(angle_radian)),
+                                 yes  = NA,
+                                 no   = ifelse(test = max(angle_radian, na.rm = T) == max(abs(angle_radian), na.rm = T),
+                                               yes  = max(abs(angle_radian), na.rm = T),
+                                               no   = -max(abs(angle_radian), na.rm = T))))
+    
+  cols <- colnames(cluster_tmp)[c(1,5,13:19)]
+  cluster_tmp <- setDT(cluster_tmp)[, ..cols]
+  cluster_tmp <- cluster_tmp[!duplicated(cluster_tmp),]
+
+  if (base_val == F) cluster_tmp <- setDT(cluster_tmp)[, base_val := NULL,]
+  
+  # Scaling values for clustering
+  scale_cols <- colnames(cluster_tmp)[-1]
+  cluster_norm_tmp <- setDT(cluster_tmp)[, (scale_cols) := lapply(.SD, scale), .SDcols = scale_cols]
+  
+  # Clustering
+  tmp_comb <- suppressWarnings(amap::Dist(setDT(cluster_norm_tmp)[, ..scale_cols], method = "euclid"))
+  tmp_comb <- stats::hclust(tmp_comb, method = method)
+  cluster_norm_tmp$memb_CluMP <- stats::cutree(tmp_comb, k = cl_numb)
+
+  cluster_tmp <- merge(cluster_tmp, cluster_norm_tmp[, c("CluMP_ID", "memb_CluMP")], by = "CluMP_ID")
+  setcolorder(cluster_tmp, c("CluMP_ID", scale_cols, "memb_CluMP"))
 
   names(cluster_tmp)[1] <- group # put back old names
 
-  data <- left_join(data, cluster_tmp[, c(group, "memb_CluMP")], by = group)
+  cols <- c(group, "memb_CluMP")
+  data <- merge(data, setDT(cluster_tmp)[, ..cols], by = group)
+  
+  data  <- data[order(Time)]
 
   return(list("CluMP" = cluster_tmp, "data" = data, "formula" = formula, "variables" = variables, "group" = group))
 }

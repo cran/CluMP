@@ -1,6 +1,6 @@
 Package: CluMP
 Title: Clustering of Micro Panel Data
-Version: 0.7.1
+Version: 0.8
 Authors@R: c(
         person("Jan", "Fojtik", email = "9afojtik@gmail.com", role = "aut"),
 	person("Anna", "Grishko", email = "anja.grishko@gmail.com", role = c("aut", "cre")),
@@ -13,13 +13,13 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Imports: MASS, ggplot2 (>= 3.0.0), dplyr (>= 0.7.6), NbClust (>= 3.0),
-        amap (>= 0.8-16), tableone, rlang, stats
+        amap (>= 0.8-16), tableone, rlang, stats, data.table
 Suggests: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2019-04-02 17:54:33 UTC; sob
+Packaged: 2020-02-05 19:26:37 UTC; Анна
 Author: Jan Fojtik [aut],
   Anna Grishko [aut, cre],
   Lukas Sobisek [aut, cph, rev]
 Maintainer: Anna Grishko <anja.grishko@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-04-05 09:42:55 UTC
+Date/Publication: 2020-02-17 14:10:05 UTC

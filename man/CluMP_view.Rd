@@ -42,9 +42,9 @@ data <- rbind(dataMale, dataFemale)
 
 CluMPoutput <- CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3)
 title <- "Plotting clusters' representatives with error bars"
-CluMP_view(CluMPoutput, type = "all" , return_table = TRUE, title = title)
+CluMP_view(CluMPoutput, type = "all" , return_table = TRUE)
 CluMP_view(CluMPoutput, type = "cont")
-CluMP_view(CluMPoutput, type = "breaks", nb_intervals = 5, return_table=TRUE)
+CluMP_view(CluMPoutput, type = "breaks", nb_intervals = 5, return_table=TRUE, title = title)
 
 }
 \keyword{CluMP}
