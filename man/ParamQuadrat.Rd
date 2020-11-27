@@ -4,7 +4,8 @@
 \name{ParamQuadrat}
 \alias{ParamQuadrat}
 \title{Parameters of quadratic model}
-\format{It is adviced to keep parameters in \code{\link[base]{data.frame}}. The Parameters structure is as follows:
+\format{
+It is adviced to keep parameters in \code{\link[base]{data.frame}}. The Parameters structure is as follows:
 \describe{
   \item{b0}{fixed parameter of intercept}
   \item{b1}{fixed parameter of slope}
@@ -13,7 +14,8 @@
   \item{varU1}{variance of random factor U1 given to fixed parameter b1}
   \item{corr}{correlation between random factors U0 and U1}
   \item{varE}{the variability of the residuals}
-}}
+}
+}
 \source{
 Allen, JS, Bruss, J, Brown, CK, Damasio, H. Normal neuroanatomical variation due to age: the major lobes and a parcellation of the temporal region. Neurobiol Aging. 2005 Oct;26(9):1245-60; discussion 1279-82.
 

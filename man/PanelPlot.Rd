@@ -4,9 +4,18 @@
 \alias{PanelPlot}
 \title{Plot Micro-Panel (longitudinal) Data}
 \usage{
-PanelPlot(data, formula = Y ~ Time, group = "ID", colour = NA,
-  mean_traj_all = FALSE, mean_traj_group = FALSE, show_legend = TRUE,
-  title = NULL, x_title = NULL, y_title = NULL)
+PanelPlot(
+  data,
+  formula = Y ~ Time,
+  group = "ID",
+  colour = NA,
+  mean_traj_all = FALSE,
+  mean_traj_group = FALSE,
+  show_legend = TRUE,
+  title = NULL,
+  x_title = NULL,
+  y_title = NULL
+)
 }
 \arguments{
 \item{data}{A data frame containing the variables named in \code{formula} and \code{group} arguments.}

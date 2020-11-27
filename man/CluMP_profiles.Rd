@@ -4,8 +4,7 @@
 \alias{CluMP_profiles}
 \title{Summary characteristics of identified clusters via CluMP}
 \usage{
-CluMP_profiles(CluMPoutput, cont_vars = NULL, cat_vars = NULL,
-  show_NA = FALSE)
+CluMP_profiles(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_NA = FALSE)
 }
 \arguments{
 \item{CluMPoutput}{An object (output) from the \code{\link{CluMP}} function.}

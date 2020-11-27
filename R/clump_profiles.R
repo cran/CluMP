@@ -10,6 +10,7 @@
 #' @return Returns a \code{\link[base]{list}} with cluster variable (Y) summary, both baseline and changes; time and a summary of the number of observations (visits); clustering parameters summary and optional continuous variables summary (baseline and changes) and categorical variables summary (baseline and end).
 #' @export
 #' @import data.table
+#' @rawNamespace import(rlang, except = ':=')
 #' @rawNamespace import(dplyr, except = c(last, first, between))
 #' @importFrom stats median sd
 #' @examples
@@ -25,16 +26,16 @@
 #' CluMP_profiles(CluMPoutput, cat_vars = "Gender")
 #'
 CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_NA = FALSE) {
-  
+
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = .. = ..colour = 
+    slope_first_last = timepoint = value = . = .. = ..colour =
     ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
-  
-  
+
+
   nb <- setDT(CluMPoutput$CluMP)[, n := .N, by = memb_CluMP]
   cols <- c("memb_CluMP", "n")
   nb <- setDT(nb)[, ..cols]
@@ -56,36 +57,36 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
   Bl_data$memb_CluMP = as.factor(as.character(Bl_data$memb_CluMP))
   Bl_data <- setDT(Bl_data)[, ':='(
     n = n_distinct(ID),
-    meanY = mean(Y, na.rm = TRUE), 
+    meanY = mean(Y, na.rm = TRUE),
     sdY = stats::sd(Y, na.rm = TRUE),
-    medianY = median(Y, na.rm = TRUE), 
-    Q25Y = stats::quantile(Y,0.25, na.rm = TRUE), 
+    medianY = median(Y, na.rm = TRUE),
+    Q25Y = stats::quantile(Y,0.25, na.rm = TRUE),
     Q75Y = stats::quantile(Y,0.75, na.rm = TRUE),
-    minY = min(Y, na.rm = TRUE), 
+    minY = min(Y, na.rm = TRUE),
     maxY = max(Y, na.rm = TRUE)
   ), by = memb_CluMP]
   cols <- c("memb_CluMP", "n", "meanY", "sdY",
             "medianY","Q25Y", "Q75Y", "minY", "maxY")
   Bl_data <- setDT(Bl_data)[, ..cols]
   Bl_data <- Bl_data[!duplicated(Bl_data),]
-  
+
   #change
   change_data <- setDT(data)[,Visit := 1:.N, by = ID]
   change_data <- setDT(change_data)[, .SD[c(1,.N)], by = ID]
   change_data <- setDT(change_data)[,.(ID, Visit, X1, Y, memb_CluMP),]
   change_data <- setDT(change_data)[,Visit := 1:.N, by = ID]
-  
+
   visit_f <- setDT(change_data)[Visit == 1,,]
   visit_f$Visit <- NULL
   visit_f$X1 <- NULL
   visit_f$memb_CluMP <- NULL
-  
+
   visit_l <- setDT(change_data)[Visit == 2,,]
   visit_l$Visit <- NULL
   change_data <- merge(visit_f, visit_l, by = "ID")
-  
+
   change_data <- setDT(change_data)[, ':='(
-    abs_change = Y.y - Y.x, 
+    abs_change = Y.y - Y.x,
     abs_change_ann = (Y.y - Y.x)/X1),]
   change_data <- setDT(change_data)[, ':='(
     n = n_distinct(ID),
@@ -100,7 +101,7 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
     q50_abs_change_ann = stats:: quantile(abs_change_ann, 0.5, na.rm = TRUE),
     q75_abs_change_ann = stats:: quantile(abs_change_ann, 0.75, na.rm = TRUE)
     ), by = memb_CluMP]
-  cols <- c("memb_CluMP", "n", "mean_abs_change", "sd_abs_change", 
+  cols <- c("memb_CluMP", "n", "mean_abs_change", "sd_abs_change",
             "q25_abs_change", "q50_abs_change", "q75_abs_change",
             "mean_abs_change_ann", "sd_abs_change_ann", "q25_abs_change_ann",
             "q50_abs_change_ann", "q75_abs_change_ann")
@@ -110,8 +111,8 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
   Y <- list("baseline" = as.data.frame(Bl_data), "change" = as.data.frame(change_data))
 
   #Time
-  f_up_data <- setDT(data)[, ':='(nVisit = .N, 
-                                  f_up = data.table::last(X1), 
+  f_up_data <- setDT(data)[, ':='(nVisit = .N,
+                                  f_up = data.table::last(X1),
                                   memb_CluMP = data.table::first(memb_CluMP))
                            , by = ID][order(X1)]
   f_up_data <- setDT(data)[, ':='(n = n_distinct(ID),
@@ -137,7 +138,7 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
     cols <- c(cont_vars, "memb_CluMP")
     cont_bl <- setDT(cont_bl)[, ..cols]
     cont_bl <- cont_bl[!duplicated(cont_bl),]
-    
+
     cont_bl <- cont_bl[, c(lapply(.SD, mean),
                            lapply(.SD, sd)), by = memb_CluMP]
     names(cont_bl)[-1] <- c(paste0(cont_vars, "_mean"), paste0(cont_vars, "_sd"))
@@ -153,9 +154,9 @@ CluMP_profiles <- function(CluMPoutput, cont_vars = NULL, cat_vars = NULL, show_
     cont_change <- cont_change[, c(lapply(.SD, mean),
                                    lapply(.SD, sd)), by = memb_CluMP]
     names(cont_change)[-1] <- c(paste0(cont_vars, "_ann_mean"), paste0(cont_vars, "_ann_sd"))
-    
+
     cont_change <- merge(nb, cont_change, by = "memb_CluMP")
-    
+
     cont <- list(baseline = as.data.frame(cont_bl), change = as.data.frame(cont_change))
   } else if (is.null(cont_vars)) {
     cont <- NULL

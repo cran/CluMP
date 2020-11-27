@@ -14,7 +14,7 @@
 #' @import data.table
 #' @examples
 #' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
-#' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, 
+#' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3,
 #' base_val = FALSE, method = "ward.D")
 #'
 #' CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3,
@@ -22,13 +22,13 @@
 #'
 #'
 CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE, method = "ward.D"){
-  
+
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = .. = ..colour = 
+    slope_first_last = timepoint = value = . = .. = ..colour =
     ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
 
 
@@ -55,7 +55,7 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE, method =
   mf <- cbind(mf, setDT(data)[, ..group])
   names(mf)[3] <- "CluMP_ID"
   mf_complete <- mf[stats::complete.cases(mf),]
-  
+
   # save mf_complete as data table. In order to speed up computations
   mf_complete <- as.data.table(mf_complete)
   mf_complete <- setDT(mf_complete)[, if (.N > 2) .SD, by = CluMP_ID]
@@ -120,17 +120,17 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE, method =
                                  no   = ifelse(test = max(angle_radian, na.rm = T) == max(abs(angle_radian), na.rm = T),
                                                yes  = max(abs(angle_radian), na.rm = T),
                                                no   = -max(abs(angle_radian), na.rm = T))))
-    
+
   cols <- colnames(cluster_tmp)[c(1,5,13:19)]
   cluster_tmp <- setDT(cluster_tmp)[, ..cols]
   cluster_tmp <- cluster_tmp[!duplicated(cluster_tmp),]
 
   if (base_val == F) cluster_tmp <- setDT(cluster_tmp)[, base_val := NULL,]
-  
+
   # Scaling values for clustering
   scale_cols <- colnames(cluster_tmp)[-1]
   cluster_norm_tmp <- setDT(cluster_tmp)[, (scale_cols) := lapply(.SD, scale), .SDcols = scale_cols]
-  
+
   # Clustering
   tmp_comb <- suppressWarnings(amap::Dist(setDT(cluster_norm_tmp)[, ..scale_cols], method = "euclid"))
   tmp_comb <- stats::hclust(tmp_comb, method = method)
@@ -143,7 +143,7 @@ CluMP <- function(formula, group, data, cl_numb = NA, base_val = FALSE, method =
 
   cols <- c(group, "memb_CluMP")
   data <- merge(data, setDT(cluster_tmp)[, ..cols], by = group)
-  
+
   data  <- data[order(Time)]
 
   return(list("CluMP" = cluster_tmp, "data" = data, "formula" = formula, "variables" = variables, "group" = group))

@@ -61,15 +61,15 @@
 #' PanelPlot(data, colour = "Cluster")
 
 GeneratePanel <- function(n, Param, NbVisit, VisitFreq = NULL, TimeVar = NULL, RegModel = NULL, ClusterProb = NULL, Rho = NULL, units = NULL) {
-  
+
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = .. = ..colour = 
+    slope_first_last = timepoint = value = . = .. = ..colour =
     ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
-  
+
   k = nrow(Param) #defines the number of clusters
 
   #Setting not defined parameters

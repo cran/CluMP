@@ -4,8 +4,17 @@
 \alias{GeneratePanel}
 \title{Generate an artificial Micro-Panel (longitudinal) Data}
 \usage{
-GeneratePanel(n, Param, NbVisit, VisitFreq = NULL, TimeVar = NULL,
-  RegModel = NULL, ClusterProb = NULL, Rho = NULL, units = NULL)
+GeneratePanel(
+  n,
+  Param,
+  NbVisit,
+  VisitFreq = NULL,
+  TimeVar = NULL,
+  RegModel = NULL,
+  ClusterProb = NULL,
+  Rho = NULL,
+  units = NULL
+)
 }
 \arguments{
 \item{n}{An integer specifying the number of individuals (trajectories) being observed.}

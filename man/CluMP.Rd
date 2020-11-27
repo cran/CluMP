@@ -7,8 +7,7 @@
 Sobisek, L., Stachova, M., Fojtik, J. (2018) Novel Feature-Based Clustering of Micro-Panel Data (CluMP). Working paper version online: www.arxiv.org
 }
 \usage{
-CluMP(formula, group, data, cl_numb = NA, base_val = FALSE,
-  method = "ward.D")
+CluMP(formula, group, data, cl_numb = NA, base_val = FALSE, method = "ward.D")
 }
 \arguments{
 \item{formula}{A two-sided \code{\link[stats]{formula}} object with a numeric clustering variable (Y) on the left of a ~ separator and the time (numeric) variable on the right. Time is measured from the start of the follow-up period (baseline). Any time units are possible.}
@@ -31,7 +30,7 @@ This function clusters Micro-Panel (longitudinal) Data (or trajectories) to a pr
 }
 \examples{
 data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
-CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3, 
+CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3,
 base_val = FALSE, method = "ward.D")
 
 CluMP(formula = Y ~ Time, group = "ID", data = data, cl_numb = 3,

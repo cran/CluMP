@@ -11,7 +11,8 @@
 #' @return Determine the optimal number of clusters, returns graphical output (red dot in plot indicates the recommended number of clusters according to that index) and table with indices.
 #' @source Malika Charrad, Nadia Ghazzali, Veronique Boiteau, Azam Niknafs (2014). NbClust: An R Package for Determining the Relevant Number of Clusters in a Data Set. Journal of Statistical Software, 61(6), 1-36. URL http://www.jstatsoft.org/v61/i06/.
 #' @export
-#' @import data.table ggplot2 NbClust
+#' @import ggplot2 NbClust
+#' @import data.table
 #' @examples
 #' set.seed(123)
 #' data <- GeneratePanel(n = 100, Param = ParamLinear, NbVisit = 10)
@@ -25,17 +26,17 @@ OptiNum <- function(formula, group, data, index = c("silhouette", "ch", "db"), m
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = .. = ..colour = 
+    slope_first_last = timepoint = value = . = .. = ..colour =
     ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
-  
-  
+
+
   # Modelframe from formula
   mf <- stats:: model.frame(formula = formula, data = data, na.action = NULL)
   variables <- names(mf)
   names(mf) <- c("CluMP_Y", "CluMP_X1")
   mf <- cbind(mf, "CluMP_ID" = data[, group])
   mf_complete <- mf[stats:: complete.cases(mf),]
-  
+
   # save mf_complete as data table. In order to speed up computations
   mf_complete <- as.data.table(mf_complete)
   mf_complete <- setDT(mf_complete)[, if (.N > 2) .SD, by = CluMP_ID]
@@ -76,7 +77,7 @@ OptiNum <- function(formula, group, data, index = c("silhouette", "ch", "db"), m
   cluster_tmp <- setDT(cluster_tmp)[, cosinus := ifelse(cos_nom/cos_denom > 1, 1, cos_nom/cos_denom), ]
   cluster_tmp <- setDT(cluster_tmp)[, abs_angle_radian := acos(cosinus), ]
   cluster_tmp <- setDT(cluster_tmp)[, angle_radian := ifelse(slope_first_last < slope, 1, -1)*abs_angle_radian, ]
-  
+
   cluster_tmp <- setDT(cluster_tmp)[, ':='(
     base_val = first(base_val),
     mean_triangle = mean(obsah_trojuh, na.rm = T),
@@ -94,13 +95,13 @@ OptiNum <- function(formula, group, data, index = c("silhouette", "ch", "db"), m
   cols <- colnames(cluster_tmp)[c(1,5,13:19)]
   cluster_tmp <- setDT(cluster_tmp)[, ..cols]
   cluster_tmp <- cluster_tmp[!duplicated(cluster_tmp),]
-  
+
   if (base_val == F) cluster_tmp <- setDT(cluster_tmp)[, base_val := NULL,]
-  
+
   # Scaling values for clustering
   scale_cols <- colnames(cluster_tmp)[-1]
   cluster_norm_tmp <- setDT(cluster_tmp)[, (scale_cols) := lapply(.SD, scale), .SDcols = scale_cols]
-  
+
 
   #Prepare indices for plotting
   plotData <- data.frame()
@@ -165,7 +166,7 @@ OptiNum <- function(formula, group, data, index = c("silhouette", "ch", "db"), m
     labs(x = "number of clusters", y = "coefficient value",
          caption = bN) +
     facet_wrap( ~ index, ncol = max(1,length(index)%/%2), scales="free_y")
-  
+
   names(cluster_norm_tmp)[1] <- group # put back old names
 
   return(list("plot" = plotIndex, "indexTable" = as.data.frame(plotData), "bestNumber" = bestNumber,

@@ -4,7 +4,8 @@
 \name{ParamExpon}
 \alias{ParamExpon}
 \title{Parameters of exponential model}
-\format{It is adviced to keep parameters in \code{\link[base]{data.frame}}. The Parameters structure is as follows:
+\format{
+It is adviced to keep parameters in \code{\link[base]{data.frame}}. The Parameters structure is as follows:
 \describe{
   \item{b0}{fixed parameter of intercept}
   \item{b1}{fixed parameter of slope}
@@ -13,7 +14,8 @@
   \item{varU1}{variance of random factor U1 given to fixed parameter b1}
   \item{corr}{correlation between random factors U0 and U1}
   \item{varE}{the variability of the residuals}
-}}
+}
+}
 \source{
 Jones BC, Nair G, Shea CD, Crainiceanu CM, Cortese IC, Reich DS. Quantification of multiple-sclerosis-related brain atrophy in two heterogeneous MRI datasets using mixed-effects modeling. Neuroimage Clin. 2013 Aug 13;3:171-9. doi: 10.1016/j.nicl.2013.08.001.
 }

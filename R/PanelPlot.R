@@ -14,7 +14,8 @@
 #' @keywords CLUMP
 #' @return Returns plot using package ggplot2.
 #' @export
-#' @import data.table ggplot2
+#' @import ggplot2
+#' @import data.table
 #' @examples
 #' set.seed(123)
 #' dataMale <- GeneratePanel(n = 50, Param = ParamLinear, NbVisit = 10)
@@ -37,10 +38,10 @@ PanelPlot <- function(data, formula = Y ~ Time, group = "ID", colour = NA,
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = .. = ..colour = 
+    slope_first_last = timepoint = value = . = .. = ..colour =
     ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
-  
-  
+
+
   # Modelframe from formula
   data <- as.data.table(data)
   mf <- stats::model.frame(formula = formula, data = data, na.action = NULL)
@@ -50,7 +51,7 @@ PanelPlot <- function(data, formula = Y ~ Time, group = "ID", colour = NA,
   if (!is.numeric(mf$Y)){
     stop('Clustering variable should be numeric')
   }
-  
+
   if(!is.na(colour) & !(colour %in% colnames(data))){
     warning(paste0('Trere is no colour variable in the data set named ', colour, '. colour by ID variable.'), call. = FALSE)
     colour <- NA

@@ -12,7 +12,8 @@
 #' @keywords CluMP
 #' @return Returns graph for type \emph{"all"} and \emph{"cont"} or (list with) graph and table of mean trajectories (if specified) for type = \emph{"breaks"}.
 #' @export
-#' @import ggplot2 data.table
+#' @import ggplot2
+#' @import data.table
 #' @rawNamespace import(dplyr, except = c(last, first, between))
 #' @examples
 #' set.seed(123)
@@ -31,16 +32,16 @@
 #'
 CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_table = FALSE,
                        title = NULL, x_title = NULL, y_title = NULL, plot_NA = FALSE) {
-  
+
   # define global variables
   CluMP_ID = CluMP_X1 = CluMP_Y = ID = Visit = X1 = X1_ann = Y = Y.x = Y.y = Y_ci =
     abs_angle_radian = abs_change = abs_change_ann = angle_radian = best = bestVal =
     cluster = cos_denom = cos_nom  = cosinus = f_up = mean_Time = mean_Y =
     memb_CluMP = nVisit = number = obsah_trojuh = sd_Y = slope =
-    slope_first_last = timepoint = value = . = .. = ..colour = 
+    slope_first_last = timepoint = value = . = .. = ..colour =
     ..cols = ..cont_vars = ..group = ..scale_cols = Time = NULL
-  
-  
+
+
   if(!(type %in% c("all", "cont", "breaks"))) {
     stop('Type should be one of "all", "cont" or "breaks".')
   }
@@ -52,7 +53,7 @@ CluMP_view <- function(CluMPoutput, type = "all", nb_intervals = NULL, return_ta
   cols <- c(CluMPoutput$variables, CluMPoutput$group, "memb_CluMP")
   PlotData <- setDT(CluMPoutput$data)[, ..cols]
   PlotData$memb_CluMP <- as.factor(PlotData$memb_CluMP)
-  
+
   if (!plot_NA) {
     PlotData <- setDT(PlotData)[!is.na(memb_CluMP),]
   }

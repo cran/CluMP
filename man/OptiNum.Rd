@@ -7,8 +7,14 @@
 Malika Charrad, Nadia Ghazzali, Veronique Boiteau, Azam Niknafs (2014). NbClust: An R Package for Determining the Relevant Number of Clusters in a Data Set. Journal of Statistical Software, 61(6), 1-36. URL http://www.jstatsoft.org/v61/i06/.
 }
 \usage{
-OptiNum(formula, group, data, index = c("silhouette", "ch", "db"),
-  max_clust = 10, base_val = FALSE)
+OptiNum(
+  formula,
+  group,
+  data,
+  index = c("silhouette", "ch", "db"),
+  max_clust = 10,
+  base_val = FALSE
+)
 }
 \arguments{
 \item{formula}{A two-sided \code{\link[stats]{formula}} object, with a numeric, clustering variable (Y) on the left of a ~ separator and the time (numeric) variable on the right. Time is measured from the start of the follow-up period (baseline).}

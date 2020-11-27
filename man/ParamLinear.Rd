@@ -4,7 +4,8 @@
 \name{ParamLinear}
 \alias{ParamLinear}
 \title{Parameters of linear model}
-\format{It is adviced to keep parameters in \code{\link[base]{data.frame}}. The Parameters structure is as follows:
+\format{
+It is adviced to keep parameters in \code{\link[base]{data.frame}}. The Parameters structure is as follows:
 \describe{
   \item{b0}{fixed parameter of intercept}
   \item{b1}{fixed parameter of slope}
@@ -12,7 +13,8 @@
   \item{varU1}{variance of random factor U1 given to fixed parameter b1}
   \item{corr}{correlation between random factors U0 and U1}
   \item{varE}{the variability of the residuals}
-}}
+}
+}
 \source{
 Uher T, Vaneckova M, Krasensky J, Sobisek L, Tyblova M, Volna J, Seidl Z, Bergsland N, Dwyer MG, Zivadinov R, De Stefano N, Sormani MP, Havrdova EK, Horakova D. Pathological cut-offs of global and regional brain volume loss in multiple sclerosis. Mult Scler. 2017 Nov 1:1352458517742739. doi: 10.1177/1352458517742739.
 }

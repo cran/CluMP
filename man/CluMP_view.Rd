@@ -4,9 +4,16 @@
 \alias{CluMP_view}
 \title{Cluster profiles' (CluMP results) visualisation}
 \usage{
-CluMP_view(CluMPoutput, type = "all", nb_intervals = NULL,
-  return_table = FALSE, title = NULL, x_title = NULL,
-  y_title = NULL, plot_NA = FALSE)
+CluMP_view(
+  CluMPoutput,
+  type = "all",
+  nb_intervals = NULL,
+  return_table = FALSE,
+  title = NULL,
+  x_title = NULL,
+  y_title = NULL,
+  plot_NA = FALSE
+)
 }
 \arguments{
 \item{CluMPoutput}{An object (output) from the \code{\link{CluMP}} function.}

@@ -1,3 +1,9 @@
+## version 0.8.1
+
+---
+
+- Maintainer changed
+
 ## version 0.8.0
 
 ---
